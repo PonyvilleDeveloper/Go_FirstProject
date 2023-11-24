@@ -1,17 +1,16 @@
 package service
 
 import (
-	"encoding/json"
 	"app/entity"
 	"app/storage"
-	"fmt"
+	"encoding/json"
 )
 
 func CreateOrder(data []byte) {
 	var order entity.Order
 	err := json.Unmarshal(data, &order)
 	if err != nil {
-		service.log("\t\t[SERVICE]: Decoding json order for adding error: %v\n", err)
+		log("\t\t[SERVICE]: Decoding json order for adding error: %v\n", err)
 	}
 	storage.AddOrder(order)
 }
@@ -20,7 +19,7 @@ func UpdateOrder(id uint32, data []byte) {
 	var order entity.Order
 	err := json.Unmarshal(data, &order)
 	if err != nil {
-		service.log("\t\t[SERVICE]: Decoding json order for changing error: %v\n", err)
+		log("\t\t[SERVICE]: Decoding json order for changing error: %v\n", err)
 	}
 	storage.ChangeOrder(id, order)
 }
@@ -33,7 +32,7 @@ func GetOrderById(id uint32) []byte {
 	order := storage.GetOrderById(id)
 	json, err := json.Marshal(order)
 	if err != nil {
-		service.log("\t\t[SERVICE]: Encoding current json order error: %v\n", err)
+		log("\t\t[SERVICE]: Encoding current json order error: %v\n", err)
 	}
 	return []byte(json)
 }
@@ -42,7 +41,7 @@ func GetOrderAll() []byte {
 	orders := storage.GetOrderAll()
 	json, err := json.Marshal(orders)
 	if err != nil {
-		service.log("\t\t[SERVICE]: Encoding json order list error: %v\n", err)
+		log("\t\t[SERVICE]: Encoding json order list error: %v\n", err)
 	}
 	return []byte(json)
 }
