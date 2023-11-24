@@ -1,63 +1,32 @@
 package storageSQL
 
 import (
+	"app/db"
 	"app/entity"
-	"app/service"
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
 )
 
-var driver string
-
-var file string
-
-func init() {
-	driver = "sqlite3"
-	file = "resources/storage.db"
+func AddCart(cart entity.Cart) { //Экв. Createcart в пакете service
+	db.DB().Table("carts").Create(cart)
 }
 
-func AddCart(item entity.Cart) { //Экв. CreateCart в пакете service
-	db, err := sql.Open(driver, file) //Открытие БД
-	if err != nil {
-		service.Log("\t\t[STORAGE]: Error to open db-file %v\n", err)
-	}
-
-	defer db.Close()
-
-	result, err := db.Exec("insert into items (itemId, article, name, price, creator) values")
-	if err != nil {
-		panic(err)
-	}
+func ChangeCart(id uint32, updts entity.Cart) { //Экв. Updatecart в пакете service
+	db.DB().Table("carts").Where("cartId= ?", id).Updates(updts)
 }
 
-func ChangeCart(id uint32, updts entity.Cart) { //Экв. UpdateCart в пакете service
-	db, err := sql.Open(driver, file) //Открытие БД
-	if err != nil {
-		service.Log("\t\t[STORAGE]: Error to open db-file %v\n", err)
-	}
-	defer db.Close()
+func DeleteCart(id uint32) { //Экв. Deletecart в пакете service
+	var cart entity.Cart
+	db.DB().Table("carts").Delete(&cart, id)
 }
 
-func DeleteCart(id uint32) { //Экв. DeleteCart в пакете service
-	db, err := sql.Open(driver, file) //Открытие БД
-	if err != nil {
-		service.Log("\t\t[STORAGE]: Error to open db-file %v\n", err)
-	}
-	defer db.Close()
+func GetCartById(id uint32) entity.Cart { //Экв. GetcartById в пакете service
+	var cart entity.Cart
+
+	db.DB().Table("carts").Where("id = ?", id).Find(&cart)
+	return cart
 }
 
-func GetCartById(id uint32) entity.Cart { //Экв. GetCartById в пакете service
-	db, err := sql.Open(driver, file) //Открытие БД
-	if err != nil {
-		service.Log("\t\t[STORAGE]: Error to open db-file %v\n", err)
-	}
-	defer db.Close()
-}
-
-func GetCartAll() []entity.Cart { //Экв. GetCartAll в пакете service
-	db, err := sql.Open(driver, file) //Открытие БД
-	if err != nil {
-		service.Log("\t\t[STORAGE]: Error to open db-file %v\n", err)
-	}
-	defer db.Close()
+func GetCartAll() []*entity.Cart { //Экв. GetcartAll в пакете service
+	var carts []*entity.Cart
+	db.DB().Table("carts").Find(&carts)
+	return carts
 }
