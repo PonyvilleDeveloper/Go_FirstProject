@@ -1,0 +1,67 @@
+server:
+  port: ${SERVER.PORT:8090}
+  timeout: ${SERVER.TIMEOUT:10}
+api:
+  UserAuth:
+    method: POST
+    url: auth
+  ItemCreate:
+    method: POST
+    url: item/new
+  ItemUpdate:
+    method: PUT
+    url: item/update?id=\d*
+  ItemDelete:
+    method: DELETE
+    url: item/delete?id=\d*
+  Items:
+    method: GET
+    url: item/all
+  Item:
+    method: GET
+    url: item/get?id=\d*
+  CartCreate:
+    method: POST
+    url: cart/new
+  CartUpdate:
+    method: PUT
+    url: cart/update?id=\d*
+  CartDelete:
+    method: DELETE
+    url: cart/delete?id=\d*
+  Carts:
+    method: GET
+    url: cart/all
+  Cart:
+    method: GET
+    url: cart/get?id=\d*
+  OrderCreate:
+    method: POST
+    url: order/new
+  OrderUpdate:
+    method: PUT
+    url: order/update?id=\d*
+  OrderDelete:
+    method: DELETE
+    url: order/delete?id=\d*
+  Orders:
+    method: GET
+    url: order/all
+  Order:
+    method: GET
+    url: order/get?id=\d*
+  UserCreate:
+    method: POST
+    url: user/new
+  UserUpdate:
+    method: PUT
+    url: user/update?id=\d*
+  UserDelete:
+    method: DELETE
+    url: user/delete?id=\d*
+  Users:
+    method: GET
+    url: user/all
+  User:
+    method: GET
+    url: user/get?id=\d*
