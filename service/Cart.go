@@ -2,8 +2,8 @@ package service
 
 import (
 	"app/entity"
-	"app/storage"
-	"encoding/json"
+	"app/logger"
+	"app/storageSQL"
 )
 
 func init() {
@@ -14,45 +14,36 @@ func init() {
 	CRUDS["Cart"] = GetCartById
 }
 
-func CreateCart(unprepared Unprepared) []byte { //HTTP.POST
+func CreateCart(ctx *Context) { //HTTP.POST
 	var cart entity.Cart
-	err := json.Unmarshal(unprepared.Data, &cart)
+	cart, err := ExtractData[entity.Cart](ctx)
 	if err != nil {
-		log("\t\t[SERVICE]: Decoding json cart for adding error: %v\n", err)
+		go logger.Log(packname, "Error decoding json for create Cart", err)
+		ctx.SendError(500, "Error decoding json for create Cart")
 	}
-	storage.AddCart(cart)
-	return nil
+	storageSQL.AddCart(cart)
 }
 
-func UpdateCart(unprepared Unprepared) []byte { //HTTP.PUT
+func UpdateCart(ctx *Context) { //HTTP.PUT
 	var cart entity.Cart
-	err := json.Unmarshal(unprepared.Data, &cart)
+	cart, err := ExtractData[entity.Cart](ctx)
 	if err != nil {
-		log("\t\t[SERVICE]: Decoding json cart for changing error: %v\n", err)
+		go logger.Log(packname, "Error decoding json for update Cart #", ctx.Id, err)
+		ctx.SendError(500, "Error decoding json for update Cart")
 	}
-	storage.ChangeCart(unprepared.Id, cart)
-	return nil
+	storageSQL.ChangeCart(ctx.Id, cart)
 }
 
-func DeleteCart(unprepared Unprepared) []byte { //HTTP.DELETE
-	storage.DeleteCart(unprepared.Id)
-	return nil
+func DeleteCart(ctx *Context) { //HTTP.DELETE
+	storageSQL.DeleteCart(ctx.Id)
 }
 
-func GetCartById(unprepared Unprepared) []byte { //HTTP.GET
-	cart := storage.GetCartById(unprepared.Id)
-	json, err := json.Marshal(cart)
-	if err != nil {
-		log("\t\t[SERVICE]: Encoding current json cart error: %v\n", err)
-	}
-	return json
+func GetCartById(ctx *Context) { //HTTP.GET
+	cart := storageSQL.GetCartById(ctx.Id)
+	ctx.SendAnswer(cart)
 }
 
-func GetCartAll(unprepared Unprepared) []byte { //HTTP.GET
-	carts := storage.GetCartAll()
-	json, err := json.Marshal(carts)
-	if err != nil {
-		log("\t\t[SERVICE]: Encoding json cart list error: %v\n", err)
-	}
-	return json
+func GetCartAll(ctx *Context) { //HTTP.GET
+	carts := storageSQL.GetCartAll()
+	ctx.SendAnswer(carts)
 }

@@ -1,19 +1,19 @@
 package storageSQL
 
 import (
-	"app/service"
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
+	_ "gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
-func Connect() *sql.DB { //Открытие БД
-	db, err := sql.Open("sqlite3", "resources/storage.db")
-	if err != nil {
-		service.Log("\t\t[STORAGE]: Error to open db-file %v\n", err)
-	}
-	return db
+var database *gorm.DB
+var migrations = make([]func(), 0)
+
+func AddMigration(mF func()) {
+	migrations = append(migrations, mF)
 }
 
-func Dispose(db *sql.DB) { //Освобождение БД
-	db.Close()
+func Migrate() {
+	for _, f := range migrations {
+		f()
+	}
 }

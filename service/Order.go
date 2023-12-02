@@ -2,8 +2,8 @@ package service
 
 import (
 	"app/entity"
-	"app/storage"
-	"encoding/json"
+	"app/logger"
+	"app/storageSQL"
 )
 
 func init() {
@@ -14,45 +14,36 @@ func init() {
 	CRUDS["Order"] = GetOrderById
 }
 
-func CreateOrder(unprepared Unprepared) []byte { //HTTP.POST
-	var order entity.Order
-	err := json.Unmarshal(unprepared.Data, &order)
+func CreateOrder(ctx *Context) { //HTTP.POST
+	var cart entity.Order
+	cart, err := ExtractData[entity.Order](ctx)
 	if err != nil {
-		log("\t\t[SERVICE]: Decoding json order for adding error: %v\n", err)
+		go logger.Log(packname, "Error decoding json for create Order", err)
+		ctx.SendError(500, "Error decoding json for create Order")
 	}
-	storage.AddOrder(order)
-	return nil
+	storageSQL.AddOrder(cart)
 }
 
-func UpdateOrder(unprepared Unprepared) []byte { //HTTP.PUT
-	var order entity.Order
-	err := json.Unmarshal(unprepared.Data, &order)
+func UpdateOrder(ctx *Context) { //HTTP.PUT
+	var cart entity.Order
+	cart, err := ExtractData[entity.Order](ctx)
 	if err != nil {
-		log("\t\t[SERVICE]: Decoding json order for changing error: %v\n", err)
+		go logger.Log(packname, "Error decoding json for update Order #", ctx.Id, err)
+		ctx.SendError(500, "Error decoding json for update Order")
 	}
-	storage.ChangeOrder(unprepared.Id, order)
-	return nil
+	storageSQL.ChangeOrder(ctx.Id, cart)
 }
 
-func DeleteOrder(unprepared Unprepared) []byte { //HTTP.DELETE
-	storage.DeleteOrder(unprepared.Id)
-	return nil
+func DeleteOrder(ctx *Context) { //HTTP.DELETE
+	storageSQL.DeleteOrder(ctx.Id)
 }
 
-func GetOrderById(unprepared Unprepared) []byte { //HTTP.GET
-	order := storage.GetOrderById(unprepared.Id)
-	json, err := json.Marshal(order)
-	if err != nil {
-		log("\t\t[SERVICE]: Encoding current json order error: %v\n", err)
-	}
-	return json
+func GetOrderById(ctx *Context) { //HTTP.GET
+	cart := storageSQL.GetOrderById(ctx.Id)
+	ctx.SendAnswer(cart)
 }
 
-func GetOrderAll(unprepared Unprepared) []byte { //HTTP.GET
-	orders := storage.GetOrderAll()
-	json, err := json.Marshal(orders)
-	if err != nil {
-		log("\t\t[SERVICE]: Encoding json order list error: %v\n", err)
-	}
-	return json
+func GetOrderAll(ctx *Context) { //HTTP.GET
+	carts := storageSQL.GetOrderAll()
+	ctx.SendAnswer(carts)
 }

@@ -2,8 +2,8 @@ package service
 
 import (
 	"app/entity"
-	"app/storage"
-	"encoding/json"
+	"app/logger"
+	"app/storageSQL"
 )
 
 func init() {
@@ -14,45 +14,36 @@ func init() {
 	CRUDS["User"] = GetUserById
 }
 
-func CreateUser(unprepared Unprepared) []byte { //HTTP.POST
-	var user entity.User
-	err := json.Unmarshal(unprepared.Data, &user)
+func CreateUser(ctx *Context) { //HTTP.POST
+	var cart entity.User
+	cart, err := ExtractData[entity.User](ctx)
 	if err != nil {
-		log("\t\t[SERVICE]: Decoding json user for adding error: %v\n", err)
+		go logger.Log(packname, "Error decoding json for create User", err)
+		ctx.SendError(500, "Error decoding json for create User")
 	}
-	storage.AddUser(user)
-	return nil
+	storageSQL.AddUser(cart)
 }
 
-func UpdateUser(unprepared Unprepared) []byte { //HTTP.PUT
-	var user entity.User
-	err := json.Unmarshal(unprepared.Data, &user)
+func UpdateUser(ctx *Context) { //HTTP.PUT
+	var cart entity.User
+	cart, err := ExtractData[entity.User](ctx)
 	if err != nil {
-		log("\t\t[SERVICE]: Decoding json user for changing error: %v\n", err)
+		go logger.Log(packname, "Error decoding json for update User #", ctx.Id, err)
+		ctx.SendError(500, "Error decoding json for update User")
 	}
-	storage.ChangeUser(unprepared.Id, user)
-	return nil
+	storageSQL.ChangeUser(ctx.Id, cart)
 }
 
-func DeleteUser(unprepared Unprepared) []byte { //HTTP.DELETE
-	storage.DeleteUser(unprepared.Id)
-	return nil
+func DeleteUser(ctx *Context) { //HTTP.DELETE
+	storageSQL.DeleteUser(ctx.Id)
 }
 
-func GetUserById(unprepared Unprepared) []byte { //HTTP.GET
-	user := storage.GetUserById(unprepared.Id)
-	json, err := json.Marshal(user)
-	if err != nil {
-		log("\t\t[SERVICE]: Encoding current json user error: %v\n", err)
-	}
-	return json
+func GetUserById(ctx *Context) { //HTTP.GET
+	cart := storageSQL.GetUserById(ctx.Id)
+	ctx.SendAnswer(cart)
 }
 
-func GetUserAll(unprepared Unprepared) []byte { //HTTP.GET
-	users := storage.GetUserAll()
-	json, err := json.Marshal(users)
-	if err != nil {
-		log("\t\t[SERVICE]: Encoding json user list error: %v\n", err)
-	}
-	return json
+func GetUserAll(ctx *Context) { //HTTP.GET
+	carts := storageSQL.GetUserAll()
+	ctx.SendAnswer(carts)
 }

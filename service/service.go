@@ -1,14 +1,11 @@
 package service
 
-type Unprepared struct {
-	Data []byte
-	Id   uint32
-}
-
 var (
-	CRUDS map[string]func(unprepared Unprepared) (data []byte)
+	CRUDS    map[string]func(ctx *Context)
+	packname string
 )
 
 func init() {
-	CRUDS = make(map[string]func(unprepared Unprepared) (data []byte))
+	CRUDS = make(map[string]func(ctx *Context))
+	packname = "SERVICE"
 }

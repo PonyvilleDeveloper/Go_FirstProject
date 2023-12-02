@@ -2,8 +2,8 @@ package service
 
 import (
 	"app/entity"
-	"app/storage"
-	"encoding/json"
+	"app/logger"
+	"app/storageSQL"
 )
 
 func init() {
@@ -14,45 +14,36 @@ func init() {
 	CRUDS["Item"] = GetItemById
 }
 
-func CreateItem(unprepared Unprepared) []byte { //HTTP.POST
-	var item entity.Item
-	err := json.Unmarshal(unprepared.Data, &item)
+func CreateItem(ctx *Context) { //HTTP.POST
+	var cart entity.Item
+	cart, err := ExtractData[entity.Item](ctx)
 	if err != nil {
-		log("\t\t[SERVICE]: Decoding json item for adding error: %v\n", err)
+		go logger.Log(packname, "Error decoding json for create Item", err)
+		ctx.SendError(500, "Error decoding json for create Item")
 	}
-	storage.AddItem(item)
-	return nil
+	storageSQL.AddItem(cart)
 }
 
-func UpdateItem(unprepared Unprepared) []byte { //HTTP.PUT
-	var item entity.Item
-	err := json.Unmarshal(unprepared.Data, &item)
+func UpdateItem(ctx *Context) { //HTTP.PUT
+	var cart entity.Item
+	cart, err := ExtractData[entity.Item](ctx)
 	if err != nil {
-		log("\t\t[SERVICE]: Decoding json item for changing error: %v\n", err)
+		go logger.Log(packname, "Error decoding json for update Item #", ctx.Id, err)
+		ctx.SendError(500, "Error decoding json for update Item")
 	}
-	storage.ChangeItem(unprepared.Id, item)
-	return nil
+	storageSQL.ChangeItem(ctx.Id, cart)
 }
 
-func DeleteItem(unprepared Unprepared) []byte { //HTTP.DELETE
-	storage.DeleteItem(unprepared.Id)
-	return nil
+func DeleteItem(ctx *Context) { //HTTP.DELETE
+	storageSQL.DeleteItem(ctx.Id)
 }
 
-func GetItemById(unprepared Unprepared) []byte { //HTTP.GET
-	item := storage.GetItemById(unprepared.Id)
-	json, err := json.Marshal(item)
-	if err != nil {
-		log("\t\t[SERVICE]: Encoding current json item error: %v\n", err)
-	}
-	return json
+func GetItemById(ctx *Context) { //HTTP.GET
+	cart := storageSQL.GetItemById(ctx.Id)
+	ctx.SendAnswer(cart)
 }
 
-func GetItemAll(unprepared Unprepared) []byte { //HTTP.GET
-	items := storage.GetItemAll()
-	json, err := json.Marshal(items)
-	if err != nil {
-		log("\t\t[SERVICE]: Encoding json item list error: %v\n", err)
-	}
-	return json
+func GetItemAll(ctx *Context) { //HTTP.GET
+	carts := storageSQL.GetItemAll()
+	ctx.SendAnswer(carts)
 }

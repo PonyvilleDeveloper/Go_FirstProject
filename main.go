@@ -2,7 +2,7 @@ package main
 
 import (
 	"app/config"
-	"app/db"
+	"app/storageSQL"
 	"flag"
 	"fmt"
 	"net/http"
@@ -33,6 +33,6 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	db.Migrate()
+	storageSQL.Migrate()
 	server.ListenAndServe()
 }
